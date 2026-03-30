@@ -106,31 +106,7 @@ The following data was aggregated using VectorDBBench and Locust across a 768-di
 
 ---
 
-### Part 3: Strategic Findings and Use Case Mapping
-
-#### 3.1 Performance Validation
-
-The benchmark data in Part 2 confirms the architectural claims from Part 1.
-
-- **Qdrant** proves to be the "Engineer's Choice," showing nearly negligible latency increase (8ms to 15ms) when moving from unfiltered to "Hard" filtered search, confirming its superior Query Planner.
-- **Pinecone's** visibility latency (up to 60 seconds) validates its eventual consistency profile, making it unsuitable for real-time RAG architectures where data must be retrieved immediately after ingestion.
-- **Milvus (Zilliz)** demonstrated the best stability at 500 users, handling concurrent search and ingest with the lowest performance degradation (+10%), which confirms its enterprise-grade separation of storage and compute.
-
-#### 3.2 Resource Estimation
-
-For the HNSW algorithm used by all five providers, memory consumption can be estimated with the following formula:
-
-```
-Memory_Total ≈ N × (d × 4 + M × 12)
-```
-
-- **N:** Number of vectors (e.g., 1,000,000)
-- **d:** Dimensions (e.g., 768)
-- **M:** Connectivity (typically 16–32)
-
-For a production dataset of 10M vectors, developers should budget for **40GB to 60GB of RAM** unless utilizing Qdrant's Binary Quantization, which can reduce this floor significantly.
-
-#### 3.3 Recommended Use Cases
+### Part 3: Use Case Mapping
 
 | Database | Recommended Use Case | Why? |
 |---|---|---|
@@ -163,6 +139,52 @@ Performance Metrics
 Moreover, I also measure QPS, latency and error rate when ingesting 10k vectors into database and 100 users send requests simultaneously.
 | Metric | Qdrant | Pinecone | Milvus | Weaviate | Chroma |
 |---|---|---|---|---|---|
-| QPS | | | | | |
-| Latency p99 | | | | | |
-| Error Rate | | | | | |
+| QPS | 100-160 | 160-180 | 170-180 |76-100 | 120-130 |
+| Latency p99 |330-1000ms | 280-750ms | 260-880ms | 1.6-2s | 310-1600ms |
+| Error Rate | 0-0.6 | 0-78 | 0 | 0 | 0-90 |
+
+### Some key findings  
+
+**1. Weaviate dominates ingestion speed**   
+Weaviate indexed 100k vectors in ~33 seconds, compared to ~8 minutes for Milvus and ~50 minutes for Qdrant.  
+
+**2. Milvus hard-filter recall collapses**  
+Milvus recall drops to 21.25% under a hard filter (1% selectivity) due to its default post-filtering mechanism — HNSW search runs first, then metadata filtering is applied, discarding most candidates. This is a critical limitation for any workload requiring strict metadata constraints.  
+
+**3. Pinecone throttles aggressively under load**  
+At 500 concurrent users, Pinecone reached 270 failures/s, a direct consequence of serverless rate limiting.  
+
+**4. Weaviate degrades severely under concurrent load**  
+Despite fast ingestion, Weaviate's p99 latency climbs to 5–41 seconds at 500 users, with QPS dropping to 20–40. It does not scale well under high concurrency.  
+
+**5. Chroma is more stable than expected**  
+Chroma maintained 200–220 QPS at 500 users with near-zero error rate, outperforming Weaviate and approaching Qdrant — contrary to its reputation as a prototype-only tool.  
+
+**6. Milvus is the most stable under concurrent load**  
+Milvus sustained 0 errors at both 100 and 500 users while maintaining competitive QPS (290–370), consistent with its enterprise-grade architecture separating storage and compute.  
+
+---
+
+### Use Case Recommendations  
+
+> **Note:** Recommendations below are derived from benchmark conditions
+> (≤ 100k vectors, cloud deployment). Results may differ significantly
+> at production scale or with self-hosted configurations.
+
+| Priority | Recommended DB | Rationale |
+|---|---|---|
+| Fast ingestion pipeline | **Weaviate** | 33s for 100k vectors — unmatched |
+| High-recall with complex filters | **Qdrant** | Stable recall across all filter levels |
+| High concurrency, zero errors | **Milvus** | Best stability under load |
+| No-ops managed deployment | **Pinecone** | Accept throttling at scale |
+| Rapid prototyping | **Chroma** | Easiest setup, surprisingly stable |
+| Avoid for hard metadata filtering | **Milvus (default config)** | 21.25% recall is unacceptable |
+
+---
+
+## Limitations
+
+- **Small dataset scale:** 10k–100k vectors do not reflect production behavior at millions of vectors.
+- **Network overhead:** All databases were accessed over cloud APIs from the same geographic location, meaning latency figures include network round-trip time and are not pure engine benchmarks.
+- **Default configurations only:** No per-database tuning was applied. Milvus hard-filter recall, for example, can be improved by adjusting `ef` and `nprobe` parameters.
+- **Pinecone tier:** Throttling results reflect a low-tier serverless plan; higher Read Unit allocation would reduce failure rates.
