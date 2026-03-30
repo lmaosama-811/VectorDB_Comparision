@@ -15,20 +15,21 @@ In this project, I will examine whether these figures are correct or not. I have
 + Index Construction Overhead
 
 The result of some measures is shown in these below table (check REPORT.md for more detail):  
-|             | Without filter    | With filter (simple) |  With filter(hard)|  
-|             | Recall  | Latency | Recall  |  Latency   | Recall | Latency  |  
-| Qdrant      | 99.78%  | 0.28    | 98.14%  |  0.28      | 100.00%| 0.28     | 
-| Pinecone    | 99.04%  | 0.27    | 98.87%  |  0.27      | 99.16% | 0.25     | 
-| Milvus      | 95.49%  | 0.25    | 95.6%   |  0.26      | 21.25% | 0.26     | 
-| Weaviate    | 99.73%  | 0.1     | 100.00% |  0.1       | 100.00%| 0.1      | 
-| Chroma      | 98.67%  | 0.26    | 98.24%  |  0.25      | 97.14% | 0.25     | 
+| Database | Recall (No Filter) | Latency (No Filter) | Recall (Simple Filter) | Latency (Simple Filter) | Recall (Hard Filter) | Latency (Hard Filter) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Weaviate** | 99.73% | 0.10s | 100.00% | 0.10s | 100.00% | 0.10s |
+| **Qdrant** | 99.78% | 0.28s | 98.14% | 0.28s | 100.00% | 0.28s |
+| **Pinecone** | 99.04% | 0.27s | 98.87% | 0.27s | 99.16% | 0.25s |
+| **Chroma** | 98.67% | 0.26s | 98.24% | 0.25s | 97.14% | 0.25s |
+| **Milvus** | 95.49% | 0.25s | 95.60% | 0.26s | 21.25% | 0.26s |
 
 **Note**: The data is reference only. The results vary depending on several factors, include: hardcore system, quality of internet connection to cloud,...
 
 ## Conclude
-Each vector database has their own strength. Based on different purposes, we utilize their strenghth:
-+ Milvus:
-+ Qdrant:
-+ Pinecone:
-+ Chroma:
-+ Weaviate: 
+Each database excels in specific scenarios. Depending on your project's priorities, here is how to choose:
+
+* **Weaviate:** The top performer for **speed and precision**. Ideal for RAG applications requiring sub-100ms latency and complex filtering.
+* **Qdrant:** The most **stable and resource-efficient** choice. Perfect for production environments where Rust-based reliability and balanced performance are key.
+* **Pinecone:** The ultimate **No-Ops** solution. Best for teams wanting to scale instantly without managing any underlying infrastructure.
+* **Chroma:** The go-to for **simplicity and rapid prototyping**. Excellent for lightweight projects and a smooth developer experience.
+* **Milvus (Zilliz):** An **enterprise-grade powerhouse** designed for massive scalability (billion-scale vectors), suitable for large data lakes with specialized tuning.
