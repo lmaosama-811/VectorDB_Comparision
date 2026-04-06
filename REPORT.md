@@ -6,14 +6,14 @@ This report evaluates the performance and operational characteristics of the top
 ## I. Gemini Report 
 ### Part 1: Overview and Architectural Profiles
 
-#### 1. Pinecone
+#### 1. Pinecone (Simple & Convenience)
 
 Pinecone is a fully managed, cloud-native vector database designed for teams requiring "Zero-Ops" scalability. It abstracts all infrastructure management, allowing developers to interact solely via API to perform billion-vector semantic searches. In 2026, its serverless architecture remains the industry standard for rapid time-to-market and enterprise reliability.
 
 **Strengths:**
-- **Operational Simplicity:** No clusters to manage; features automatic scaling and maintenance.
-- **Dedicated Read Nodes (DRN):** Provides provisioned resources for predictable performance in high-throughput applications.
-- **Ecosystem Maturity:** Deepest integration with leading AI frameworks like LangChain and LlamaIndex.
+- **Zero-Ops:** Install and use in minutes via API.
+- **Serverless:** Serverless version (launching strongly in 2024-2025) optimizes costs by only paying for the actual capacity used.
+- **Stability:** Highly consistent performance without manual tuning.
 
 **Weaknesses:**
 - **Proprietary Lock-in:** Cloud-only deployment with no self-hosted or open-source local version.
@@ -22,14 +22,14 @@ Pinecone is a fully managed, cloud-native vector database designed for teams req
 
 ---
 
-#### 2. Qdrant
+#### 2. Qdrant (Pure Performance)
 
 Qdrant is a high-performance vector search engine written in Rust, optimized for memory efficiency and complex metadata filtering. It enables users to attach rich JSON payloads to vectors and filter queries without the typical performance "cliffs" seen in other systems. The engine is available both as a mature managed cloud and an easily deployable open-source container.
 
 **Strengths:**
 - **Rust Efficiency:** Delivers ultra-low latency and high throughput while maintaining a small memory footprint.
 - **Payload Filtering:** Best-in-class metadata filtering that operates natively within the search graph traversal.
-- **Advanced Quantization:** Supports Binary and Scalar quantization, reducing RAM requirements by 4x to 32x.
+- **Compression capability:** Supports vector compression (Scalar/Binary Quantization), saving up to 90% of RAM.
 
 **Weaknesses:**
 - **Sharding Complexity:** Static sharding requires manual redistribution when datasets grow beyond initial node capacity.
@@ -37,13 +37,13 @@ Qdrant is a high-performance vector search engine written in Rust, optimized for
 
 ---
 
-#### 3. Milvus (Zilliz Cloud)
+#### 3. Milvus (Zilliz Cloud) (Enterprise Scale)
 
 Milvus is a distributed, cloud-native vector database built for massive enterprise workloads handling billions to trillions of vectors. It utilizes a microservices architecture that separates storage, computation, and log management to allow independent horizontal scaling. Zilliz Cloud provides the managed version with the "Cardinal" engine, boosting performance by up to 10x over the open-source core.
 
 **Strengths:**
 - **Massive Scalability:** Designed from the ground up for trillion-scale datasets with robust sharding.
-- **GPU Acceleration:** Native support for GPU-accelerated indexing (e.g., ScaNN) for extreme performance.
+- **Flexibility:** Support diverse type of index (HNSW, IVF,...)
 - **Strong Consistency:** Supports multiple consistency levels, including "Strong" for immediate search visibility.
 
 **Weaknesses:**
@@ -52,14 +52,14 @@ Milvus is a distributed, cloud-native vector database built for massive enterpri
 
 ---
 
-#### 4. Weaviate
+#### 4. Weaviate (Hybrid Specialist)
 
 Weaviate is an AI-native database that integrates vector search with structured filtering and built-in machine learning modules. It acts as an AI memory layer, capable of automatically generating embeddings by connecting directly to model providers. It is highly optimized for hybrid search, combining keyword-based BM25 and vector-based retrieval.
 
 **Strengths:**
 - **Batteries-Included:** Internal modules handle the entire embedding and reranking pipeline.
 - **Hybrid Search Integration:** Excellent out-of-the-box support for combining vector similarity and keyword search.
-- **Flexible Deployment:** Offers unique "Embedded Weaviate" for local development alongside a robust cloud service.
+- **GraphQL:** Using GraphQL for querying makes retrieving relationships between data objects very natural.
 
 **Weaknesses:**
 - **Performance Overhead:** Written in Go; generally exhibits higher tail latency (p99) than Rust-based Qdrant.
@@ -67,7 +67,7 @@ Weaviate is an AI-native database that integrates vector search with structured 
 
 ---
 
-#### 5. Chroma
+#### 5. Chroma (Prototype - Developer's choice)
 
 Chroma is an open-source embedding database focused on developer experience and rapid prototyping. It is designed to run directly inside a Python process (embedded mode), making it the "SQLite" of vector search for AI agents and POCs. Its 2026 Cloud GA release provides a seamless migration path to production clusters.
 
